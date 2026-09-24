@@ -29,9 +29,26 @@ export const logger = pino({
     },
   },
   redact: {
-    paths: ['req.headers.authorization', 'headers.authorization', 'address', 'creator'],
+    paths: [
+      'req.headers.authorization',
+      'headers.authorization',
+      'address',
+      'creator',
+      'secret',
+      'token',
+      'password',
+      'apiKey',
+      'api_key',
+      'privateKey',
+      'private_key',
+      'credentials',
+      'wallet',
+    ],
     censor: (value: any, path: string[]) => {
-      if (typeof value === 'string' && (path.includes('address') || path.includes('creator')) && value.startsWith('G') && value.length > 50) {
+      const pathStr = path.join('.').toLowerCase();
+      
+      // Handle specific address/creator redaction logic if needed, otherwise generic
+      if (typeof value === 'string' && (pathStr.includes('address') || pathStr.includes('creator')) && value.startsWith('G') && value.length > 50) {
         return `${value.slice(0, 5)}...${value.slice(-5)}`;
       }
       return '[REDACTED]';
