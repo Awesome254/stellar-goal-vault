@@ -259,7 +259,9 @@ function migrate(database: SQLiteDatabase): void {
       FOREIGN KEY (campaign_id) REFERENCES campaigns(id)
     );
 
+    -- #874 pledges persistence query indexes (concrete read plans only)
     CREATE INDEX IF NOT EXISTS idx_pledges_campaign_id ON pledges(campaign_id);
+    -- Supports getPledgesByContributor: WHERE contributor ORDER BY created_at DESC, id DESC
     CREATE INDEX IF NOT EXISTS idx_pledges_contributor ON pledges(contributor, created_at, id);
 
     CREATE TABLE IF NOT EXISTS campaign_events (
@@ -466,9 +468,11 @@ export function ensureSeedWorkflowIndexes(database: SQLiteDatabase = getDb()): v
     CREATE INDEX IF NOT EXISTS idx_notifications_campaign_id
       ON notifications(campaign_id);
 
+    -- #874: active-pledge accounting (SUM/COUNT where refunded_at IS NULL)
     CREATE INDEX IF NOT EXISTS idx_pledges_campaign_refunded
       ON pledges(campaign_id, refunded_at);
 
+    -- #874: ordered campaign pledge lists (listCampaignPledges)
     CREATE INDEX IF NOT EXISTS idx_pledges_campaign_created_id
       ON pledges(campaign_id, created_at DESC, id DESC);
 
