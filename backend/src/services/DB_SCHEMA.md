@@ -72,16 +72,20 @@ All indexes use `CREATE INDEX IF NOT EXISTS` to ensure idempotence.
 - `idx_campaigns_created_at` on `campaigns(created_at)` — listing / seed
   verification ordered by creation time.
 
-### Pledge indexes
+### Pledge indexes (#874)
+
+Indexes for pledges persistence are chosen from concrete query plans (contributor
+history, campaign pledge lists, and active-pledge accounting). All use
+`CREATE INDEX IF NOT EXISTS` so migrate stays idempotent.
 
 - `idx_pledges_campaign_id` on `pledges(campaign_id)` — pledges for a campaign.
 - `idx_pledges_contributor` on `pledges(contributor, created_at, id)` —
-  contributor history pagination.
+  contributor history pagination (`getPledgesByContributor`).
 - `idx_pledges_campaign_refunded` on `pledges(campaign_id, refunded_at)` —
   active-pledge accounting (`SUM` where `refunded_at IS NULL`), used by migrate
   recomputation and seed regression checks.
 - `idx_pledges_campaign_created_id` on `pledges(campaign_id, created_at DESC, id DESC)` —
-  ordered pledge lists after seed / API reads.
+  ordered pledge lists after seed / API reads (`listCampaignPledges`).
 - `idx_pledges_transaction_hash` unique partial on `pledges(transaction_hash)`
   where `transaction_hash IS NOT NULL`.
 
